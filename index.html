@@ -8,19 +8,22 @@
   <style>
     :root{
       --bg:#0b1020;
-      --panel:#111833;
-      --card:#0f1630;
       --text:#e9ecff;
       --muted:#aab2e6;
-      --line: rgba(255,255,255,.10);
+      --line: rgba(255,255,255,.12);
       --shadow: 0 10px 30px rgba(0,0,0,.35);
       --r:18px;
-      --pad:14px;
+
       --accent:#6ea8ff;
-      --good:#2dd4bf;
+      --ok:#2dd4bf;
       --warn:#fbbf24;
       --bad:#fb7185;
-      --neutral:#93c5fd;
+      --neutral:#9ca3af;
+
+      --q1:#fb7185;  /* rot */
+      --q2:#fbbf24;  /* gelb */
+      --q3:#2dd4bf;  /* grün */
+      --q4:#9ca3af;  /* grau */
     }
 
     *{ box-sizing:border-box; }
@@ -28,182 +31,88 @@
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 10% 0%, rgba(110,168,255,.25), transparent 55%),
-                  radial-gradient(900px 500px at 90% 10%, rgba(45,212,191,.18), transparent 55%),
-                  radial-gradient(900px 500px at 50% 100%, rgba(251,113,133,.14), transparent 55%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 600px at 10% 0%, rgba(110,168,255,.18), transparent 55%),
+        radial-gradient(900px 500px at 90% 10%, rgba(45,212,191,.12), transparent 55%),
+        radial-gradient(900px 500px at 50% 100%, rgba(251,113,133,.10), transparent 55%),
+        var(--bg);
       color: var(--text);
     }
 
-    .wrap{
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 18px 14px 90px;
-    }
+    .wrap{ max-width:1100px; margin:0 auto; padding:18px 14px 96px; }
+    header{ display:flex; gap:12px; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+    .title{ display:flex; flex-direction:column; gap:6px; }
+    h1{ margin:0; font-size:22px; letter-spacing:.2px; line-height:1.15; }
+    .sub{ margin:0; color:var(--muted); font-size:13px; }
 
-    header{
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-      justify-content:space-between;
-      margin-bottom: 14px;
-    }
-
-    .title{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    h1{
-      margin:0;
-      font-size: 22px;
-      letter-spacing:.2px;
-      line-height:1.15;
-    }
-
-    .sub{
-      margin:0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .status{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-end;
-      gap:6px;
-      min-width: 170px;
-    }
-
+    .status{ display:flex; flex-direction:column; align-items:flex-end; gap:6px; min-width:200px; }
     .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border: 1px solid var(--line);
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border:1px solid var(--line);
       background: rgba(255,255,255,.06);
-      border-radius: 999px;
-      font-size: 12px;
-      color: var(--muted);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(8px);
+      border-radius:999px; font-size:12px; color:var(--muted);
+      box-shadow: var(--shadow); backdrop-filter: blur(8px);
     }
+    .dot{ width:10px; height:10px; border-radius:50%; background: var(--neutral); box-shadow: 0 0 0 4px rgba(156,163,175,.14); }
 
-    .dot{
-      width:10px; height:10px;
-      border-radius:50%;
-      background: var(--good);
-      box-shadow: 0 0 0 4px rgba(45,212,191,.14);
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    @media (min-width: 860px){
-      .grid{
-        grid-template-columns: 1fr 1fr;
-      }
-      h1{ font-size: 26px; }
-    }
+    .grid{ display:grid; grid-template-columns:1fr; gap:12px; }
+    @media (min-width: 860px){ .grid{ grid-template-columns:1fr 1fr; } h1{ font-size:26px; } }
 
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
       border: 1px solid var(--line);
       border-radius: var(--r);
       box-shadow: var(--shadow);
       overflow:hidden;
-      position:relative;
+      background: rgba(255,255,255,.04);
     }
 
     .cardHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      padding: 12px 12px 10px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(0,0,0,.10);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:12px 12px 10px;
+      border-bottom:1px solid var(--line);
+      background: rgba(0,0,0,.14);
     }
 
-    .cardHead .label{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-width: 0;
+    .label{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+    .cardHead strong{ font-size:14px; letter-spacing:.2px; }
+    .hint{ font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .colorBadge{
+      width:14px; height:14px; border-radius:6px;
+      border: 1px solid rgba(255,255,255,.20);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.06);
+      flex:0 0 auto;
     }
 
-    .cardHead strong{
-      font-size: 14px;
-      letter-spacing:.2px;
-    }
+    .cardBody{ padding:12px; display:flex; flex-direction:column; gap:10px; }
 
-    .hint{
-      font-size: 12px;
-      color: var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+    .q1 { background: linear-gradient(180deg, rgba(251,113,133,.14), rgba(255,255,255,.03)); }
+    .q2 { background: linear-gradient(180deg, rgba(251,191,36,.14), rgba(255,255,255,.03)); }
+    .q3 { background: linear-gradient(180deg, rgba(45,212,191,.14), rgba(255,255,255,.03)); }
+    .q4 { background: linear-gradient(180deg, rgba(156,163,175,.14), rgba(255,255,255,.03)); }
 
-    .tag{
-      font-size: 11px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      color: var(--text);
+    .addRow{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .addRow input[type="text"]{
+      flex: 1 1 240px;
+      min-width: 160px;
+      border:1px solid var(--line);
       background: rgba(255,255,255,.06);
-      flex: 0 0 auto;
-    }
-
-    .tag.good{ border-color: rgba(45,212,191,.35); background: rgba(45,212,191,.10); }
-    .tag.warn{ border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.10); }
-    .tag.bad{ border-color: rgba(251,113,133,.35); background: rgba(251,113,133,.10); }
-    .tag.neutral{ border-color: rgba(147,197,253,.35); background: rgba(147,197,253,.10); }
-
-    textarea{
-      width: 100%;
-      min-height: 170px;
-      resize: vertical;
-      border: 0;
-      outline: none;
-      padding: 12px;
-      font-size: 14px;
-      line-height: 1.4;
       color: var(--text);
-      background: transparent;
-    }
-    textarea::placeholder{ color: rgba(170,178,230,.55); }
-
-    .footerBar{
-      position: fixed;
-      left:0; right:0; bottom:0;
-      background: rgba(10,14,30,.72);
-      border-top: 1px solid var(--line);
-      backdrop-filter: blur(10px);
+      border-radius: 12px;
       padding: 10px 12px;
-      z-index: 999;
+      outline:none;
     }
-
-    .barInner{
-      max-width: 1100px;
-      margin: 0 auto;
-      display:flex;
-      flex-wrap:wrap;
-      gap: 10px;
-      align-items:center;
-      justify-content:space-between;
+    .addRow input[type="date"],
+    .addRow input[type="time"],
+    .addRow input[type="number"]{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      outline:none;
     }
-
-    .btnRow{
-      display:flex;
-      gap: 8px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+    .addRow input[type="number"]{ width: 110px; }
 
     button{
       appearance:none;
@@ -214,51 +123,89 @@
       border-radius: 12px;
       font-size: 13px;
       cursor: pointer;
-      transition: transform .06s ease, background .12s ease, border-color .12s ease;
+      transition: transform .06s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
     }
-
     button:active{ transform: translateY(1px); }
     button:hover{ background: rgba(255,255,255,.12); }
-
-    .primary{
-      border-color: rgba(110,168,255,.45);
-      background: rgba(110,168,255,.18);
-    }
+    .primary{ border-color: rgba(110,168,255,.45); background: rgba(110,168,255,.18); }
     .primary:hover{ background: rgba(110,168,255,.24); }
+    .ghost{ background: transparent; }
+    .iconBtn{ padding:8px 10px; border-radius: 12px; font-size: 13px; line-height: 1; }
+    .danger:hover{ border-color: rgba(251,113,133,.55); background: rgba(251,113,133,.12); }
 
-    .ghost{
-      background: transparent;
+    ul.tasks{
+      list-style:none; padding:0; margin:0;
+      display:flex; flex-direction:column; gap:8px;
+      min-height: 40px;
     }
 
-    .rightInfo{
+    li.task{
+      display:flex; gap:10px; align-items:flex-start;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      border-radius: 14px;
+      padding: 10px 10px;
+    }
+
+    li.task.dragging{ opacity:.55; }
+    ul.tasks.dropTarget{ outline: 2px dashed rgba(110,168,255,.35); outline-offset: 6px; border-radius: 14px; }
+
+    .tLeft{ display:flex; gap:10px; align-items:flex-start; flex:1 1 auto; min-width:0; }
+    .tLeft input[type="checkbox"]{ width:18px; height:18px; margin-top:2px; accent-color: var(--accent); }
+    .tTextWrap{ display:flex; flex-direction:column; gap:4px; min-width:0; flex:1 1 auto; }
+    .tText{ font-size: 14px; line-height:1.25; overflow-wrap:anywhere; }
+    .tMeta{ font-size:12px; color: var(--muted); display:flex; gap:10px; flex-wrap:wrap; }
+    .done .tText{ text-decoration: line-through; opacity: .65; }
+    .done{ opacity: .92; }
+
+    .tRight{ display:flex; gap:6px; align-items:center; flex:0 0 auto; }
+
+    .footerBar{
+      position: fixed; left:0; right:0; bottom:0;
+      background: rgba(10,14,30,.78);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      padding: 10px 12px;
+      z-index: 999;
+      transform: translateY(110%);
+      transition: transform .18s ease;
+    }
+    .footerBar.open{ transform: translateY(0); }
+
+    .barInner{
+      max-width: 1100px;
+      margin: 0 auto;
       display:flex;
-      gap:10px;
+      flex-wrap:wrap;
+      gap: 10px;
       align-items:center;
-      color: var(--muted);
-      font-size: 12px;
+      justify-content:space-between;
     }
-
+    .btnRow{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .rightInfo{ display:flex; gap:10px; align-items:center; color: var(--muted); font-size: 12px; }
     .toggle{
-      display:flex;
-      align-items:center;
-      gap:8px;
+      display:flex; align-items:center; gap:8px;
       padding: 8px 10px;
       border: 1px solid var(--line);
       border-radius: 999px;
       background: rgba(255,255,255,.06);
     }
+    input[type="checkbox"].toggleCbx{ width:18px; height:18px; accent-color: var(--accent); }
 
-    input[type="checkbox"]{
-      width: 18px; height: 18px;
-      accent-color: var(--accent);
+    .fab{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 1000;
+      border-radius: 999px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
-
-    .smallLink{
-      color: var(--muted);
-      text-decoration: underline;
-      cursor:pointer;
-      user-select:none;
-    }
+    .fab:active{ transform: translateY(1px); }
+    .smallLink{ color: var(--muted); text-decoration: underline; cursor:pointer; user-select:none; }
   </style>
 </head>
 
@@ -267,74 +214,32 @@
     <header>
       <div class="title">
         <h1>Eisenhower-Matrix</h1>
-        <p class="sub">Offline-fähig ohne Service Worker. Daten bleiben lokal auf diesem Gerät. Export/Import = Backup.</p>
+        <p class="sub">Sortiert nach Datum+Uhrzeit. Drag&Drop zwischen Quadranten. 📅 öffnet Google Kalender mit Start/Ende.</p>
       </div>
       <div class="status">
         <div class="pill"><span class="dot" id="dot"></span><span id="saveState">bereit</span></div>
-        <div class="pill" id="lastSavedPill">zuletzt gespeichert: <span id="lastSaved">–</span></div>
+        <div class="pill">zuletzt gespeichert: <span id="lastSaved">–</span></div>
       </div>
     </header>
 
-    <div class="grid">
-      <section class="card">
-        <div class="cardHead">
-          <div class="label">
-            <strong>Wichtig &amp; dringend</strong>
-            <div class="hint">Sofort erledigen</div>
-          </div>
-          <span class="tag bad">DO</span>
-        </div>
-        <textarea id="q1" placeholder="• Aufgabe…&#10;• Aufgabe…"></textarea>
-      </section>
-
-      <section class="card">
-        <div class="cardHead">
-          <div class="label">
-            <strong>Wichtig &amp; nicht dringend</strong>
-            <div class="hint">Planen / terminieren</div>
-          </div>
-          <span class="tag good">PLAN</span>
-        </div>
-        <textarea id="q2" placeholder="• Projekt…&#10;• Routine…"></textarea>
-      </section>
-
-      <section class="card">
-        <div class="cardHead">
-          <div class="label">
-            <strong>Nicht wichtig &amp; dringend</strong>
-            <div class="hint">Delegieren / schnell abarbeiten</div>
-          </div>
-          <span class="tag warn">DELEGATE</span>
-        </div>
-        <textarea id="q3" placeholder="• Telefonat…&#10;• Termin…"></textarea>
-      </section>
-
-      <section class="card">
-        <div class="cardHead">
-          <div class="label">
-            <strong>Nicht wichtig &amp; nicht dringend</strong>
-            <div class="hint">Streichen / später</div>
-          </div>
-          <span class="tag neutral">DROP</span>
-        </div>
-        <textarea id="q4" placeholder="• Nice-to-have…&#10;• Irgendwann…"></textarea>
-      </section>
-    </div>
+    <div class="grid" id="grid"></div>
   </div>
 
-  <div class="footerBar">
+  <button class="fab" id="menuBtn" aria-label="Menü öffnen/schließen">Menü</button>
+
+  <div class="footerBar" id="footer">
     <div class="barInner">
       <div class="btnRow">
         <button class="primary" id="saveBtn">Speichern</button>
         <button id="exportBtn">Export (JSON)</button>
         <button id="importBtn">Import (JSON)</button>
         <input id="fileInput" type="file" accept="application/json" hidden />
-        <button class="ghost" id="clearBtn" title="Löscht nur die lokalen Daten dieser Seite">Alles leeren</button>
+        <button class="ghost" id="clearBtn" title="Löscht nur lokale Daten dieser Seite">Alles leeren</button>
       </div>
 
       <div class="rightInfo">
-        <div class="toggle" title="Speichert automatisch nach kurzer Pause beim Tippen">
-          <input type="checkbox" id="autosave" checked />
+        <div class="toggle" title="Speichert automatisch nach kurzer Pause">
+          <input class="toggleCbx" type="checkbox" id="autosave" checked />
           <label for="autosave">Autosave</label>
         </div>
         <span class="smallLink" id="aboutLink">Info</span>
@@ -343,13 +248,17 @@
   </div>
 
 <script>
-  const STORAGE_KEY = "eisenhower_matrix_v1";
+  const STORAGE_KEY = "eisenhower_matrix_tasks_v3";
+
+  const QUADS = [
+    { key:"q1", title:"Wichtig & dringend", hint:"Sofort erledigen", colorVar:"--q1", className:"q1" },
+    { key:"q2", title:"Wichtig & nicht dringend", hint:"Planen / terminieren", colorVar:"--q2", className:"q2" },
+    { key:"q3", title:"Nicht wichtig & dringend", hint:"Delegieren / schnell abarbeiten", colorVar:"--q3", className:"q3" },
+    { key:"q4", title:"Nicht wichtig & nicht dringend", hint:"Streichen / später", colorVar:"--q4", className:"q4" },
+  ];
 
   const els = {
-    q1: document.getElementById("q1"),
-    q2: document.getElementById("q2"),
-    q3: document.getElementById("q3"),
-    q4: document.getElementById("q4"),
+    grid: document.getElementById("grid"),
     saveBtn: document.getElementById("saveBtn"),
     exportBtn: document.getElementById("exportBtn"),
     importBtn: document.getElementById("importBtn"),
@@ -358,151 +267,415 @@
     autosave: document.getElementById("autosave"),
     saveState: document.getElementById("saveState"),
     lastSaved: document.getElementById("lastSaved"),
-    lastSavedPill: document.getElementById("lastSavedPill"),
     dot: document.getElementById("dot"),
     aboutLink: document.getElementById("aboutLink"),
+    menuBtn: document.getElementById("menuBtn"),
+    footer: document.getElementById("footer"),
   };
 
-  function nowHHMM() {
-    const d = new Date();
-    const hh = String(d.getHours()).padStart(2,"0");
-    const mm = String(d.getMinutes()).padStart(2,"0");
-    return `${hh}:${mm}`;
+  function uid(){ return Math.random().toString(16).slice(2) + Date.now().toString(16); }
+  function nowHHMM(){
+    const d=new Date();
+    return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
   }
 
-  function loadData() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
-    catch { return {}; }
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    }catch{ return null; }
   }
 
-  function saveData(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  function defaultState(){
+    return { version:3, _lastSaved:null, _seq:0, q1:[], q2:[], q3:[], q4:[] };
   }
 
-  function loadMatrix() {
-    const d = loadData();
-    els.q1.value = d.q1 || "";
-    els.q2.value = d.q2 || "";
-    els.q3.value = d.q3 || "";
-    els.q4.value = d.q4 || "";
-    if (d._lastSaved) els.lastSaved.textContent = d._lastSaved;
-  }
+  let state = loadState() || defaultState();
 
-  function setSavingUi(state) {
-    // state: "bereit" | "ungespeichert" | "speichere…" | "gespeichert"
-    els.saveState.textContent = state;
-    if (state === "gespeichert") {
-      els.dot.style.background = "var(--good)";
+  function setSavingUi(mode){
+    els.saveState.textContent = mode;
+    if (mode==="gespeichert"){
+      els.dot.style.background = "var(--ok)";
       els.dot.style.boxShadow = "0 0 0 4px rgba(45,212,191,.14)";
-    } else if (state === "speichere…") {
+    } else if (mode==="speichere…"){
       els.dot.style.background = "var(--warn)";
       els.dot.style.boxShadow = "0 0 0 4px rgba(251,191,36,.14)";
-    } else if (state === "ungespeichert") {
+    } else if (mode==="ungespeichert"){
       els.dot.style.background = "var(--bad)";
       els.dot.style.boxShadow = "0 0 0 4px rgba(251,113,133,.14)";
     } else {
       els.dot.style.background = "var(--neutral)";
-      els.dot.style.boxShadow = "0 0 0 4px rgba(147,197,253,.14)";
+      els.dot.style.boxShadow = "0 0 0 4px rgba(156,163,175,.14)";
     }
   }
 
-  function collectMatrix() {
-    return {
-      q1: els.q1.value,
-      q2: els.q2.value,
-      q3: els.q3.value,
-      q4: els.q4.value
-    };
-  }
-
-  function saveMatrix({quiet=false} = {}) {
+  function saveStateToStorage({quiet=false}={}){
     setSavingUi("speichere…");
-    const base = collectMatrix();
-    const payload = { ...base, _lastSaved: nowHHMM() };
-    saveData(payload);
-    els.lastSaved.textContent = payload._lastSaved;
+    state._lastSaved = nowHHMM();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    els.lastSaved.textContent = state._lastSaved;
     setSavingUi("gespeichert");
-    if (!quiet) {
-      // kurzes visuelles Feedback ohne Alerts
-      els.lastSavedPill.animate([{transform:"scale(1)"},{transform:"scale(1.02)"},{transform:"scale(1)"}], {duration:220});
-    }
+    if (!quiet) openFooterTemporarily();
   }
 
-  function exportJSON() {
-    const payload = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      data: loadData()
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  let t=null;
+  function markDirtyAndMaybeAutosave(){
+    setSavingUi("ungespeichert");
+    if (!els.autosave.checked) return;
+    clearTimeout(t);
+    t=setTimeout(()=>saveStateToStorage({quiet:true}), 500);
+  }
+
+  function dueTimeSortKey(task){
+    // ohne Datum -> ganz nach unten
+    const d = task.due || "9999-99-99";
+    const tm = task.time || "99:99";
+    return `${d}T${tm}`;
+  }
+
+  function sortTasks(arr){
+    return [...arr].sort((a,b)=>{
+      const ka = dueTimeSortKey(a);
+      const kb = dueTimeSortKey(b);
+      if (ka<kb) return -1;
+      if (ka>kb) return 1;
+      const oa = (a.order ?? 0);
+      const ob = (b.order ?? 0);
+      return oa - ob;
+    });
+  }
+
+  function ensureOrder(task){
+    if (typeof task.order === "number") return;
+    state._seq = (state._seq || 0) + 1;
+    task.order = state._seq;
+  }
+
+  function toGoogleDateTimeUTC(dateStr, timeStr){
+    // Google akzeptiert YYYYMMDDTHHMMSSZ (UTC). Wir konvertieren lokale Zeit -> UTC.
+    // dateStr: YYYY-MM-DD, timeStr: HH:MM
+    const [y,m,d] = dateStr.split("-").map(Number);
+    const [hh,mm] = timeStr.split(":").map(Number);
+    const local = new Date(y, (m-1), d, hh, mm, 0);
+    const pad = (n)=> String(n).padStart(2,"0");
+    const utc =
+      String(local.getUTCFullYear()).padStart(4,"0") +
+      pad(local.getUTCMonth()+1) +
+      pad(local.getUTCDate()) + "T" +
+      pad(local.getUTCHours()) +
+      pad(local.getUTCMinutes()) +
+      "00Z";
+    return utc;
+  }
+
+  function googleCalendarUrl(task){
+    const text = (task.text || "Aufgabe").trim();
+    const details = task.quadTitle ? `Quadrant: ${task.quadTitle}` : "Eisenhower-Matrix";
+
+    const base = "https://calendar.google.com/calendar/render?action=TEMPLATE";
+    // wenn kein Datum: heute
+    const date = task.due || new Date().toISOString().slice(0,10);
+    const time = task.time || "09:00";
+    const durMin = Number(task.durationMin || 30);
+
+    // Endzeit berechnen
+    const [y,m,d] = date.split("-").map(Number);
+    const [hh,mm] = time.split(":").map(Number);
+    const startLocal = new Date(y, m-1, d, hh, mm, 0);
+    const endLocal = new Date(startLocal.getTime() + durMin*60*1000);
+
+    const pad = (n)=> String(n).padStart(2,"0");
+    const endDateStr =
+      String(endLocal.getFullYear()).padStart(4,"0") + "-" +
+      pad(endLocal.getMonth()+1) + "-" +
+      pad(endLocal.getDate());
+    const endTimeStr = pad(endLocal.getHours()) + ":" + pad(endLocal.getMinutes());
+
+    const dates = `${toGoogleDateTimeUTC(date, time)}/${toGoogleDateTimeUTC(endDateStr, endTimeStr)}`;
+
+    return `${base}&text=${encodeURIComponent(text)}&details=${encodeURIComponent(details)}&dates=${encodeURIComponent(dates)}`;
+  }
+
+  // Drag & Drop
+  let dragPayload = null; // { fromKey, taskId }
+  function onDragStart(e, fromKey, taskId){
+    dragPayload = { fromKey, taskId };
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", JSON.stringify(dragPayload));
+    e.currentTarget.classList.add("dragging");
+  }
+  function onDragEnd(e){
+    e.currentTarget.classList.remove("dragging");
+    dragPayload = null;
+    document.querySelectorAll("ul.tasks.dropTarget").forEach(u=>u.classList.remove("dropTarget"));
+  }
+
+  function getTaskIndexById(arr, id){ return arr.findIndex(t=>t.id===id); }
+
+  function moveTask({fromKey, toKey, taskId, beforeTaskId=null}){
+    if (!fromKey || !toKey || !taskId) return;
+
+    const fromArr = state[fromKey] || [];
+    const idx = getTaskIndexById(fromArr, taskId);
+    if (idx<0) return;
+
+    const [task] = fromArr.splice(idx,1);
+    task.quadTitle = QUADS.find(q=>q.key===toKey)?.title || task.quadTitle;
+    ensureOrder(task);
+
+    const toArr = state[toKey] || (state[toKey]=[]);
+    if (beforeTaskId){
+      const bIdx = getTaskIndexById(toArr, beforeTaskId);
+      if (bIdx >= 0){
+        toArr.splice(bIdx,0,task);
+        renumberOrders(toKey);
+        return;
+      }
+    }
+    toArr.push(task);
+    renumberOrders(toKey);
+  }
+
+  function renumberOrders(key){
+    const arr = state[key] || [];
+    let seq = state._seq || 0;
+    for (const t of arr){
+      seq += 1;
+      t.order = seq;
+      if (!t.quadTitle) t.quadTitle = QUADS.find(q=>q.key===key)?.title || "";
+    }
+    state._seq = seq;
+    markDirtyAndMaybeAutosave();
+    render();
+  }
+
+  function allowDrop(e){ e.preventDefault(); e.dataTransfer.dropEffect = "move"; }
+
+  function handleDropToList(e, toKey){
+    e.preventDefault();
+    const raw = e.dataTransfer.getData("text/plain");
+    let p = dragPayload;
+    try{ if (raw) p = JSON.parse(raw); }catch{}
+    if (!p) return;
+    moveTask({ fromKey:p.fromKey, toKey, taskId:p.taskId, beforeTaskId:null });
+  }
+
+  function handleDropBeforeTask(e, toKey, beforeTaskId){
+    e.preventDefault();
+    const raw = e.dataTransfer.getData("text/plain");
+    let p = dragPayload;
+    try{ if (raw) p = JSON.parse(raw); }catch{}
+    if (!p) return;
+    moveTask({ fromKey:p.fromKey, toKey, taskId:p.taskId, beforeTaskId });
+  }
+
+  function render(){
+    els.grid.innerHTML = "";
+
+    for (const q of QUADS){
+      const section = document.createElement("section");
+      section.className = `card ${q.className}`;
+
+      section.innerHTML = `
+        <div class="cardHead">
+          <div class="label">
+            <strong>${q.title}</strong>
+            <div class="hint">${q.hint}</div>
+          </div>
+          <span class="colorBadge" style="background: var(${q.colorVar});"></span>
+        </div>
+        <div class="cardBody">
+          <div class="addRow">
+            <input type="text" id="${q.key}_newtext" placeholder="Neue Aufgabe…" />
+            <input type="date" id="${q.key}_newdue" title="Datum" />
+            <input type="time" id="${q.key}_newtime" title="Uhrzeit" />
+            <input type="number" id="${q.key}_newdur" title="Dauer (Min.)" min="5" step="5" value="30" />
+            <button class="primary" id="${q.key}_add">Hinzufügen</button>
+          </div>
+          <ul class="tasks" id="${q.key}_list" data-quad="${q.key}"></ul>
+        </div>
+      `;
+      els.grid.appendChild(section);
+
+      const list = section.querySelector(`#${q.key}_list`);
+      const addBtn = section.querySelector(`#${q.key}_add`);
+      const newText = section.querySelector(`#${q.key}_newtext`);
+      const newDue  = section.querySelector(`#${q.key}_newdue`);
+      const newTime = section.querySelector(`#${q.key}_newtime`);
+      const newDur  = section.querySelector(`#${q.key}_newdur`);
+
+      // default time suggestion
+      if (!newTime.value) newTime.value = "09:00";
+
+      // Drop-Zone
+      list.addEventListener("dragover", (e)=>{ allowDrop(e); list.classList.add("dropTarget"); });
+      list.addEventListener("dragleave", ()=> list.classList.remove("dropTarget"));
+      list.addEventListener("drop", (e)=>{ list.classList.remove("dropTarget"); handleDropToList(e, q.key); });
+
+      const tasksSorted = sortTasks(state[q.key] || []);
+      for (const task of tasksSorted){
+        ensureOrder(task);
+        if (!task.id) task.id = uid();
+        task.quadTitle = q.title;
+
+        const li = document.createElement("li");
+        li.className = "task" + (task.done ? " done" : "");
+        li.draggable = true;
+
+        const metaParts = [];
+        if (task.due) metaParts.push(`Datum: ${task.due}`);
+        if (task.time) metaParts.push(`Uhrzeit: ${task.time}`);
+        if (task.durationMin) metaParts.push(`Dauer: ${task.durationMin} min`);
+        const meta = metaParts.length ? metaParts.join(" · ") : "Kein Termin";
+
+        li.innerHTML = `
+          <div class="tLeft">
+            <input type="checkbox" ${task.done ? "checked":""} aria-label="Erledigt" />
+            <div class="tTextWrap">
+              <div class="tText"></div>
+              <div class="tMeta"><span>${meta}</span></div>
+            </div>
+          </div>
+          <div class="tRight">
+            <button class="iconBtn" title="In Google Kalender eintragen">📅</button>
+            <button class="iconBtn danger" title="Löschen">✕</button>
+          </div>
+        `;
+        li.querySelector(".tText").textContent = task.text || "";
+
+        li.addEventListener("dragstart", (e)=> onDragStart(e, q.key, task.id));
+        li.addEventListener("dragend", onDragEnd);
+        li.addEventListener("dragover", (e)=> allowDrop(e));
+        li.addEventListener("drop", (e)=> handleDropBeforeTask(e, q.key, task.id));
+
+        li.querySelector('input[type="checkbox"]').addEventListener("change", (e)=>{
+          task.done = !!e.target.checked;
+          markDirtyAndMaybeAutosave();
+          render();
+        });
+
+        li.querySelector('button[title="In Google Kalender eintragen"]').addEventListener("click", ()=>{
+          const url = googleCalendarUrl(task);
+          window.open(url, "_blank", "noopener");
+        });
+
+        li.querySelector('button[title="Löschen"]').addEventListener("click", ()=>{
+          state[q.key] = (state[q.key] || []).filter(t=>t.id!==task.id);
+          markDirtyAndMaybeAutosave();
+          render();
+        });
+
+        list.appendChild(li);
+      }
+
+      function addTask(){
+        const text = (newText.value || "").trim();
+        const due = newDue.value || "";
+        const time = newTime.value || "";
+        const durationMin = Number(newDur.value || 30);
+
+        if (!text) return;
+
+        state[q.key] = state[q.key] || [];
+        state._seq = (state._seq || 0) + 1;
+
+        state[q.key].push({
+          id: uid(),
+          text,
+          due,
+          time,
+          durationMin: Math.max(5, durationMin),
+          done:false,
+          order: state._seq,
+          quadTitle: q.title
+        });
+
+        newText.value = "";
+        // Datum/Uhrzeit/Dauer absichtlich beibehalten (schnelles Hintereinander-Eintragen)
+        markDirtyAndMaybeAutosave();
+        render();
+      }
+
+      addBtn.addEventListener("click", addTask);
+      newText.addEventListener("keydown", (e)=>{
+        if (e.key==="Enter"){ e.preventDefault(); addTask(); }
+      });
+    }
+
+    if (state._lastSaved) els.lastSaved.textContent = state._lastSaved;
+  }
+
+  function exportJSON(){
+    const payload = { version: 3, exportedAt: new Date().toISOString(), data: state };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `eisenhower-backup-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+    a.download = `eisenhower-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
-  function importJSON(file) {
+  function importJSON(file){
     const reader = new FileReader();
-    reader.onload = () => {
-      try {
+    reader.onload = ()=>{
+      try{
         const payload = JSON.parse(reader.result);
-        if (!payload || !payload.data || typeof payload.data !== "object") throw new Error("Ungültige Datei");
-        saveData(payload.data);
-        loadMatrix();
+        if (!payload || !payload.data) throw new Error("Ungültig");
+        state = payload.data;
+        if (!state.q1 || !state.q2 || !state.q3 || !state.q4) throw new Error("Struktur fehlt");
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         setSavingUi("gespeichert");
-      } catch (e) {
-        alert("Import fehlgeschlagen (Datei ist keine gültige Sicherung).");
+        render();
+      }catch{
+        alert("Import fehlgeschlagen (keine gültige Sicherung).");
       }
     };
     reader.readAsText(file);
   }
 
-  function clearAll() {
+  function clearAll(){
     if (!confirm("Lokale Daten für diese App wirklich löschen?")) return;
     localStorage.removeItem(STORAGE_KEY);
-    loadMatrix();
-    setSavingUi("bereit");
+    state = defaultState();
     els.lastSaved.textContent = "–";
+    setSavingUi("bereit");
+    render();
   }
 
-  // Autosave (debounced)
-  let t = null;
-  function markDirtyAndAutosave() {
-    setSavingUi("ungespeichert");
-    if (!els.autosave.checked) return;
-    clearTimeout(t);
-    t = setTimeout(() => saveMatrix({quiet:true}), 500);
+  let footerTimer = null;
+  function toggleFooter(){ els.footer.classList.toggle("open"); }
+  function openFooterTemporarily(){
+    els.footer.classList.add("open");
+    clearTimeout(footerTimer);
+    footerTimer = setTimeout(()=> els.footer.classList.remove("open"), 1500);
   }
 
-  // Wiring
-  els.saveBtn.addEventListener("click", () => saveMatrix());
+  els.menuBtn.addEventListener("click", toggleFooter);
+  els.saveBtn.addEventListener("click", ()=> saveStateToStorage());
   els.exportBtn.addEventListener("click", exportJSON);
-  els.importBtn.addEventListener("click", () => els.fileInput.click());
-  els.fileInput.addEventListener("change", (e) => {
+  els.importBtn.addEventListener("click", ()=> els.fileInput.click());
+  els.fileInput.addEventListener("change", (e)=>{
     const f = e.target.files && e.target.files[0];
     if (f) importJSON(f);
     e.target.value = "";
   });
   els.clearBtn.addEventListener("click", clearAll);
 
-  [els.q1, els.q2, els.q3, els.q4].forEach(el => {
-    el.addEventListener("input", markDirtyAndAutosave);
-  });
-
-  els.aboutLink.addEventListener("click", () => {
+  els.aboutLink.addEventListener("click", ()=>{
     alert(
-      "Hinweis:\n" +
-      "- Daten liegen lokal (dieses Gerät / dieser Browser).\n" +
-      "- Export/Import ist dein Backup.\n" +
-      "- Cloud-Sync ist ein separater Schritt."
+      "Kurzinfo:\n" +
+      "- Sortierung nach Datum+Uhrzeit (ohne Termin unten).\n" +
+      "- Drag&Drop zwischen Quadranten.\n" +
+      "- 📅 öffnet Google Kalender mit Start/Ende.\n" +
+      "- Export/Import = Backup."
     );
   });
 
-  // Init
-  loadMatrix();
+  if (state._lastSaved) els.lastSaved.textContent = state._lastSaved;
   setSavingUi("bereit");
+  render();
 </script>
 </body>
 </html>
