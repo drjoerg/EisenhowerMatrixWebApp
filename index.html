@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Eisenhower-Matrix</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 16px;
+      background: #f7f7f7;
+    }
+    h1 {
+      text-align: center;
+    }
+    .matrix {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 10px;
+    }
+    .quadrant {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      padding: 8px;
+      min-height: 160px;
+    }
+    textarea {
+      width: 100%;
+      height: 90px;
+      box-sizing: border-box;
+    }
+    .controls {
+      margin-top: 20px;
+      text-align: center;
+    }
+    button {
+      margin: 6px;
+      padding: 8px 14px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Eisenhower-Matrix</h1>
+
+<div class="matrix">
+  <div class="quadrant">
+    <strong>Wichtig & dringend</strong>
+    <textarea id="q1"></textarea>
+  </div>
+  <div class="quadrant">
+    <strong>Wichtig & nicht dringend</strong>
+    <textarea id="q2"></textarea>
+  </div>
+  <div class="quadrant">
+    <strong>Nicht wichtig & dringend</strong>
+    <textarea id="q3"></textarea>
+  </div>
+  <div class="quadrant">
+    <strong>Nicht wichtig & nicht dringend</strong>
+    <textarea id="q4"></textarea>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="saveBtn">Speichern</button>
+  <button id="exportBtn">Export (JSON)</button>
+  <button id="importBtn">Import (JSON)</button>
+  <input id="fileInput" type="file" accept="application/json" hidden>
+</div>
+
+<script>
+  const STORAGE_KEY = "eisenhower_matrix_v1";
+
+  function loadData() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  }
+
+  function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function loadMatrix() {
+    const d = loadData();
+    document.getElementById("q1").value = d.q1 || "";
+    document.getElementById("q2").value = d.q2 || "";
+    document.getElementById("q3").value = d.q3 || "";
+    document.getElementById("q4").value = d.q4 || "";
+  }
+
+  function saveMatrix() {
+    saveData({
+      q1: document.getElementById("q1").value,
+      q2: document.getElementById("q2").value,
+      q3: document.getElementById("q3").value,
+      q4: document.getElementById("q4").value
+    });
+    alert("Gespeichert");
+  }
+
+  function exportJSON() {
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      data: loadData()
+    };
+
+    const blob = new Blob(
+      [JSON.stringify(payload, null, 2)],
+      { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "eisenhower-backup.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importJSON(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const payload = JSON.parse(reader.result);
+        if (!payload.data) throw new Error("Ungültige Datei");
+        saveData(payload.data);
+        loadMatrix();
+        alert("Import erfolgreich");
+      } catch (e) {
+        alert("Import fehlgeschlagen");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  document.getElementById("saveBtn").onclick = saveMatrix;
+  document.getElementById("exportBtn").onclick = exportJSON;
+  document.getElementById("importBtn").onclick = () =>
+    document.getElementById("fileInput").click();
+
+  document.getElementById("fileInput").onchange = (e) => {
+    if (e.target.files.length > 0) {
+      importJSON(e.target.files[0]);
+    }
+  };
+
+  loadMatrix();
+</script>
+
+</body>
+</html>
+
