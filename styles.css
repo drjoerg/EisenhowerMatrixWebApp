@@ -51,32 +51,41 @@ body{
 
 input[type="text"], input[type="date"], select{
   border:1px solid var(--line);
-  background: rgba(255,255,255,.06);
+  background: rgba(255,255,255,.08);
   color: var(--text);
   border-radius: 12px;
   padding: 10px 12px;
   outline:none;
 }
 
+/* Dropdown: Optionen besser lesbar */
+select{
+  width: 260px;
+}
+select option{
+  background: #111833;   /* wichtig: Android/Chrome */
+  color: #e9ecff;
+}
+
 input[type="text"]{ flex: 1 1 360px; min-width: 220px; }
 input[type="date"]{ width: 165px; }
-select{ width: 260px; }
 
 .btn{
   appearance:none;
   border: 1px solid var(--line);
-  background: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.10);
   color: var(--text);
   padding: 10px 12px;
   border-radius: 12px;
   font-size: 13px;
   cursor: pointer;
 }
-.btn:hover{ background: rgba(255,255,255,.12); }
+.btn:hover{ background: rgba(255,255,255,.14); }
 .btn:active{ transform: translateY(1px); }
-.primary{ border-color: rgba(110,168,255,.45); background: rgba(110,168,255,.18); }
-.primary:hover{ background: rgba(110,168,255,.24); }
+.primary{ border-color: rgba(110,168,255,.45); background: rgba(110,168,255,.20); }
+.primary:hover{ background: rgba(110,168,255,.26); }
 .ghost{ background: transparent; }
+
 .linkBtn{
   border:none;
   background: transparent;
@@ -113,11 +122,8 @@ select{ width: 260px; }
   box-shadow: 0 0 0 4px rgba(255,255,255,.06);
 }
 
-.cardBody{
-  padding:12px;
-}
+.cardBody{ padding:12px; }
 
-/* große Drop-Zone: wichtig für leere Quadranten */
 .tasks{
   list-style:none;
   padding:0;
@@ -128,7 +134,6 @@ select{ width: 260px; }
   min-height: 180px;
   border-radius: 14px;
 }
-
 .tasks.dropTarget{
   outline: 2px dashed rgba(110,168,255,.45);
   outline-offset: 6px;
@@ -143,7 +148,6 @@ select{ width: 260px; }
   border-radius: 14px;
   padding: 10px 10px;
 }
-
 .task.dragging{ opacity:.55; }
 .task.done .tText{ text-decoration: line-through; opacity:.65; }
 
@@ -158,12 +162,12 @@ select{ width: 260px; }
   padding:8px 10px;
   border-radius: 12px;
   border:1px solid var(--line);
-  background: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.10);
   color: var(--text);
   cursor:pointer;
   line-height: 1;
 }
-.iconBtn:hover{ background: rgba(255,255,255,.12); }
+.iconBtn:hover{ background: rgba(255,255,255,.14); }
 .iconBtn.danger:hover{ border-color: rgba(251,113,133,.55); background: rgba(251,113,133,.12); }
 
 .q1 { background: linear-gradient(180deg, rgba(251,113,133,.14), rgba(255,255,255,.03)); }
@@ -215,14 +219,12 @@ select{ width: 260px; }
   color: var(--muted);
   font-size: 12px;
 }
-
 .pill{
   display:inline-flex; align-items:center; gap:8px;
   padding:8px 10px; border:1px solid var(--line);
   background: rgba(255,255,255,.06);
   border-radius:999px;
 }
-
 .dot{ width:10px; height:10px; border-radius:50%; background: var(--neutral); box-shadow: 0 0 0 4px rgba(156,163,175,.14); }
 
 .fab{
