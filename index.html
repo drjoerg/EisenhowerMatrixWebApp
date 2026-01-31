@@ -268,15 +268,14 @@
   const STORAGE_KEY = "eisenhower_matrix_tasks_v4";
 
   const QUADS = [
-    { key:"q1", title:"Wichtig & dringend", hint:"", colorVar:"--q1", className:"q1" },
-    { key:"q2", title:"Wichtig & nicht dringend", hint:"", colorVar:"--q2", className:"q2" },
-    { key:"q3", title:"Nicht wichtig & dringend", hint:"", colorVar:"--q3", className:"q3" },
-    { key:"q4", title:"Nicht wichtig & nicht dringend", hint:"", colorVar:"--q4", className:"q4" },
+    { key:"q1", title:"Wichtig & dringend", colorVar:"--q1", className:"q1" },
+    { key:"q2", title:"Wichtig & nicht dringend", colorVar:"--q2", className:"q2" },
+    { key:"q3", title:"Nicht wichtig & dringend", colorVar:"--q3", className:"q3" },
+    { key:"q4", title:"Nicht wichtig & nicht dringend", colorVar:"--q4", className:"q4" },
   ];
 
   const els = {
     grid: document.getElementById("grid"),
-
     globalText: document.getElementById("globalText"),
     globalDue: document.getElementById("globalDue"),
     globalQuad: document.getElementById("globalQuad"),
@@ -324,7 +323,6 @@
   }
 
   let state = loadState() || defaultState();
-
   if (!state.settings) state.settings = { hideDone:false };
   els.hideDone.checked = !!state.settings.hideDone;
 
@@ -362,10 +360,7 @@
     t=setTimeout(()=>saveStateToStorage({quiet:true}), 500);
   }
 
-  function dueSortKey(due){
-    if (!due) return "9999-99-99";
-    return due;
-  }
+  function dueSortKey(due){ return due || "9999-99-99"; }
 
   function sortTasks(arr){
     return [...arr].sort((a,b)=>{
@@ -517,6 +512,7 @@
   }
 
   function render(){
+    // Dropdown füllen
     if (!els.globalQuad.options.length){
       for (const q of QUADS){
         const opt = document.createElement("option");
@@ -527,6 +523,7 @@
       els.globalQuad.value = "q1";
     }
 
+    // GRID leeren und 4 Karten neu bauen
     els.grid.innerHTML = "";
 
     for (const q of QUADS){
@@ -708,7 +705,7 @@
     alert(
       "Kurzinfo:\n" +
       "- Oben neue Aufgabe + Datum + Ziel-Quadrant.\n" +
-      "- Sortierung nach Datum (ohne Uhrzeit-Felder).\n" +
+      "- Sortierung nach Datum.\n" +
       "- Drag&Drop zwischen Quadranten.\n" +
       "- 📅 fragt Uhrzeit/Dauer ab und öffnet Google Kalender.\n" +
       "- Export/Import = Backup."
