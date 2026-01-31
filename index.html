@@ -19,15 +19,15 @@
 
     <div class="topAdd">
       <input type="text" id="globalText" placeholder="Neue Aufgabe…" />
-      <input type="date" id="globalDue" title="Datum (optional)" />
-      <select id="globalQuad" title="Quadrant auswählen"></select>
+      <input type="date" id="globalDue" />
+      <select id="globalQuad"></select>
       <button class="primary" id="globalAdd">Hinzufügen</button>
     </div>
 
     <div class="grid" id="grid"></div>
   </div>
 
-  <button class="fab" id="menuBtn" aria-label="Menü öffnen/schließen">Menü</button>
+  <button class="fab" id="menuBtn">Menü</button>
 
   <div class="footerBar" id="footer">
     <div class="barInner">
@@ -36,21 +36,19 @@
         <button id="exportBtn">Export (JSON)</button>
         <button id="importBtn">Import (JSON)</button>
         <input id="fileInput" type="file" accept="application/json" hidden />
-        <button class="ghost" id="clearBtn" title="Löscht nur lokale Daten dieser Seite">Alles leeren</button>
+        <button class="ghost" id="clearBtn">Alles leeren</button>
       </div>
 
       <div class="rightInfo">
-        <div class="toggle" title="Speichert automatisch nach kurzer Pause">
+        <div class="toggle">
           <input class="toggleCbx" type="checkbox" id="autosave" checked />
           <label for="autosave">Autosave</label>
         </div>
 
-        <div class="toggle" title="Erledigte Aufgaben in der Ansicht ausblenden">
+        <div class="toggle">
           <input class="toggleCbx" type="checkbox" id="hideDone" />
           <label for="hideDone">Erledigte ausblenden</label>
         </div>
-
-        <span class="smallLink" id="aboutLink">Info</span>
       </div>
 
       <div class="statusRow">
