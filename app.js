@@ -1,8 +1,7 @@
 (() => {
   "use strict";
 
-  // Version erhöhen, um alte LocalStorage-Daten sauber zu trennen
-  const STORAGE_KEY = "eisenhower_matrix_tasks_v6";
+  const STORAGE_KEY = "eisenhower_matrix_tasks_v7";
 
   const QUADS = [
     { key: "q1", title: "Wichtig & dringend", colorVar: "--q1", className: "q1" },
@@ -47,7 +46,7 @@
 
   function defaultState() {
     return {
-      version: 6,
+      version: 7,
       _lastSaved: null,
       _seq: 0,
       settings: { hideDone: false },
@@ -73,7 +72,7 @@
 
   let state = loadState() || defaultState();
 
-  // UI status
+  // ---- UI Status ----
   function setSavingUi(mode) {
     els.saveState.textContent = mode;
     if (mode === "gespeichert") {
@@ -108,6 +107,7 @@
     autosaveTimer = setTimeout(() => saveStateToStorage({ quiet: true }), 500);
   }
 
+  // ---- Sorting: offene zuerst, erledigte nach unten ----
   function dueSortKey(due) {
     return due || "9999-99-99";
   }
@@ -120,10 +120,18 @@
 
   function sortTasks(arr) {
     return [...arr].sort((a, b) => {
-      const da = dueSortKey(a.due);
-      const db = dueSortKey(b.due);
-      if (da < db) return -1;
-      if (da > db) return 1;
+      // 1) done nach unten
+      const da = a.done ? 1 : 0;
+      const db = b.done ? 1 : 0;
+      if (da !== db) return da - db;
+
+      // 2) Datum
+      const ad = dueSortKey(a.due);
+      const bd = dueSortKey(b.due);
+      if (ad < bd) return -1;
+      if (ad > bd) return 1;
+
+      // 3) Reihenfolge
       return (a.order ?? 0) - (b.order ?? 0);
     });
   }
@@ -156,11 +164,8 @@
 
     if (beforeTaskId) {
       const bIdx = getTaskIndexById(toArr, beforeTaskId);
-      if (bIdx >= 0) {
-        toArr.splice(bIdx, 0, task);
-      } else {
-        toArr.push(task);
-      }
+      if (bIdx >= 0) toArr.splice(bIdx, 0, task);
+      else toArr.push(task);
     } else {
       toArr.push(task);
     }
@@ -170,11 +175,69 @@
     render();
   }
 
-  // Drag & Drop robust
+  // ---- Google Calendar Link ----
+  function toGoogleDateTimeUTC(dateStr, timeStr) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const [hh, mm] = timeStr.split(":").map(Number);
+    const local = new Date(y, (m - 1), d, hh, mm, 0);
+    const pad = (n) => String(n).padStart(2, "0");
+    return (
+      String(local.getUTCFullYear()).padStart(4, "0") +
+      pad(local.getUTCMonth() + 1) +
+      pad(local.getUTCDate()) + "T" +
+      pad(local.getUTCHours()) +
+      pad(local.getUTCMinutes()) +
+      "00Z"
+    );
+  }
+
+  function googleCalendarUrl(task, timeStr, durationMin) {
+    const text = (task.text || "Aufgabe").trim();
+    const details = task.quadTitle ? `Quadrant: ${task.quadTitle}` : "Eisenhower-Matrix";
+
+    const base = "https://calendar.google.com/calendar/render?action=TEMPLATE";
+    const date = task.due || new Date().toISOString().slice(0, 10);
+    const time = timeStr || "09:00";
+    const dur = Number(durationMin || 30);
+
+    const [y, m, d] = date.split("-").map(Number);
+    const [hh, mm] = time.split(":").map(Number);
+    const startLocal = new Date(y, m - 1, d, hh, mm, 0);
+    const endLocal = new Date(startLocal.getTime() + dur * 60 * 1000);
+
+    const pad = (n) => String(n).padStart(2, "0");
+    const endDateStr =
+      String(endLocal.getFullYear()).padStart(4, "0") + "-" +
+      pad(endLocal.getMonth() + 1) + "-" +
+      pad(endLocal.getDate());
+    const endTimeStr = pad(endLocal.getHours()) + ":" + pad(endLocal.getMinutes());
+
+    const dates = `${toGoogleDateTimeUTC(date, time)}/${toGoogleDateTimeUTC(endDateStr, endTimeStr)}`;
+    return `${base}&text=${encodeURIComponent(text)}&details=${encodeURIComponent(details)}&dates=${encodeURIComponent(dates)}`;
+  }
+
+  function promptTimeAndDuration(task) {
+    const date = task.due || new Date().toISOString().slice(0, 10);
+    const time = prompt(`Uhrzeit für "${task.text}" am ${date} (HH:MM)`, "09:00");
+    if (time === null) return null;
+    if (!/^\d{2}:\d{2}$/.test(time)) {
+      alert("Bitte Uhrzeit im Format HH:MM eingeben (z. B. 09:00).");
+      return null;
+    }
+    const dur = prompt("Dauer in Minuten", "30");
+    if (dur === null) return null;
+    const durNum = Number(dur);
+    if (!Number.isFinite(durNum) || durNum < 5) {
+      alert("Bitte eine Dauer (Minuten) >= 5 eingeben.");
+      return null;
+    }
+    return { time, dur: Math.round(durNum) };
+  }
+
+  // ---- Drag & Drop ----
   let dragPayload = null; // { fromKey, taskId }
 
   function allowDrop(e) {
-    // Muss sein, sonst verweigert Browser den Drop
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   }
@@ -193,7 +256,6 @@
   }
 
   function readPayload(e) {
-    // bevorzugt aus dataTransfer, fallback auf dragPayload
     try {
       const raw = e.dataTransfer.getData("text/plain");
       if (raw) return JSON.parse(raw);
@@ -208,9 +270,8 @@
     moveTask({ fromKey: p.fromKey, toKey, taskId: p.taskId, beforeTaskId });
   }
 
-  // Rendering
+  // ---- Render ----
   function render() {
-    // Dropdown füllen
     if (!els.globalQuad.options.length) {
       for (const q of QUADS) {
         const opt = document.createElement("option");
@@ -240,7 +301,6 @@
       const list = section.querySelector(`#${q.key}_list`);
       const body = section.querySelector(`.cardBody[data-quad="${q.key}"]`);
 
-      // Drop: sowohl auf Body als auch auf Liste
       for (const target of [list, body]) {
         target.addEventListener("dragover", (e) => { allowDrop(e); list.classList.add("dropTarget"); });
         target.addEventListener("dragleave", () => list.classList.remove("dropTarget"));
@@ -270,25 +330,34 @@
             </div>
           </div>
           <div class="tRight">
+            <button class="iconBtn" title="In Google Kalender eintragen" type="button">📅</button>
             <button class="iconBtn danger" title="Löschen" type="button">✕</button>
           </div>
         `;
 
         li.querySelector(".tText").textContent = task.text || "";
 
-        // Drag start/end
+        // Drag
         li.addEventListener("dragstart", (e) => onDragStart(e, q.key, task.id));
         li.addEventListener("dragend", onDragEnd);
 
-        // Drop "vor" diese Aufgabe (Reorder innerhalb des Quadranten)
+        // Reorder (Drop vor diese Aufgabe)
         li.addEventListener("dragover", allowDrop);
         li.addEventListener("drop", (e) => handleDropToList(e, q.key, task.id));
 
-        // Done
+        // Done: markieren + neu rendern => rutscht nach unten
         li.querySelector('input[type="checkbox"]').addEventListener("change", (e) => {
           task.done = !!e.target.checked;
           markDirtyAndMaybeAutosave();
           render();
+        });
+
+        // Google Calendar
+        li.querySelector('button[title="In Google Kalender eintragen"]').addEventListener("click", () => {
+          const res = promptTimeAndDuration(task);
+          if (!res) return;
+          const url = googleCalendarUrl(task, res.time, res.dur);
+          window.open(url, "_blank", "noopener");
         });
 
         // Delete
@@ -305,7 +374,7 @@
     if (state._lastSaved) els.lastSaved.textContent = state._lastSaved;
   }
 
-  // Add task
+  // ---- Add task ----
   function addGlobalTask() {
     const text = (els.globalText.value || "").trim();
     const due = els.globalDue.value || "";
@@ -314,6 +383,7 @@
 
     state[key] = state[key] || [];
     state._seq = (state._seq || 0) + 1;
+
     state[key].push({
       id: uid(),
       text,
@@ -328,7 +398,7 @@
     render();
   }
 
-  // Export/Import
+  // ---- Export/Import ----
   function exportJSON() {
     const payload = { version: state.version, exportedAt: new Date().toISOString(), data: state };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -372,7 +442,7 @@
     render();
   }
 
-  // Footer
+  // ---- Footer ----
   let footerTimer = null;
   function toggleFooter() {
     els.footer.classList.toggle("open");
@@ -383,13 +453,14 @@
     footerTimer = setTimeout(() => els.footer.classList.remove("open"), 1500);
   }
 
-  // Wire events
+  // ---- Wire events ----
   els.globalAdd.addEventListener("click", addGlobalTask);
   els.globalText.addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); addGlobalTask(); }
   });
 
   els.menuBtn.addEventListener("click", toggleFooter);
+
   els.saveBtn.addEventListener("click", () => saveStateToStorage());
   els.exportBtn.addEventListener("click", exportJSON);
   els.importBtn.addEventListener("click", () => els.fileInput.click());
@@ -400,6 +471,8 @@
   });
   els.clearBtn.addEventListener("click", clearAll);
 
+  // HideDone Button vorhanden und funktioniert
+  els.hideDone.checked = !!state.settings.hideDone;
   els.hideDone.addEventListener("change", () => {
     state.settings.hideDone = !!els.hideDone.checked;
     markDirtyAndMaybeAutosave();
@@ -409,15 +482,15 @@
   els.aboutBtn.addEventListener("click", () => {
     alert(
       "Kurzinfo:\n" +
-      "- Oben Aufgabe + Datum + Ziel-Quadrant.\n" +
-      "- Drag&Drop innerhalb und zwischen Quadranten.\n" +
-      "- Erledigte ausblenden per Toggle.\n" +
+      "- Aufgabe + Datum + Ziel-Quadrant.\n" +
+      "- Erledigte rutschen nach unten.\n" +
+      "- Toggle: Erledigte ausblenden.\n" +
+      "- 📅 fragt Uhrzeit/Dauer und öffnet Google Kalender.\n" +
       "- Export/Import = Backup."
     );
   });
 
-  // Init
-  els.hideDone.checked = !!state.settings.hideDone;
+  // ---- Init ----
   setSavingUi("bereit");
   if (state._lastSaved) els.lastSaved.textContent = state._lastSaved;
   render();
