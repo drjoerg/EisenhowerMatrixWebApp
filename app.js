@@ -1,11 +1,12 @@
 const STORAGE_KEY = "eisenhower_matrix_tasks_v4";
 
 const QUADS = [
-  { key:"q1", title:"Wichtig & dringend", hint:"Sofort erledigen", colorVar:"--q1", className:"q1" },
-  { key:"q2", title:"Wichtig & nicht dringend", hint:"Planen / terminieren", colorVar:"--q2", className:"q2" },
-  { key:"q3", title:"Nicht wichtig & dringend", hint:"Delegieren / schnell abarbeiten", colorVar:"--q3", className:"q3" },
-  { key:"q4", title:"Nicht wichtig & nicht dringend", hint:"Streichen / später", colorVar:"--q4", className:"q4" },
+  { key:"q1", title:"Wichtig & dringend", colorVar:"--q1", className:"q1" },
+  { key:"q2", title:"Wichtig & nicht dringend", colorVar:"--q2", className:"q2" },
+  { key:"q3", title:"Nicht wichtig & dringend", colorVar:"--q3", className:"q3" },
+  { key:"q4", title:"Nicht wichtig & nicht dringend", colorVar:"--q4", className:"q4" },
 ];
+
 
 const els = {
   grid: document.getElementById("grid"),
